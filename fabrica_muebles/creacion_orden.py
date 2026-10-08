@@ -77,12 +77,16 @@ def order_summary(user_data: dict, order_lines: list) -> None:
     print(f"VIP?: {user_data['vip']}")
 
     print("ITEMS")
+    total = Decimal("0.00")
     for line in order_lines:
         product = line["product"]
         amount = line["amount"]
-        print(f"{product['name']} - precio: {product['price']}, cantidad solicitada: {amount}")
+        subtotal = product["price"] * amount
+        total += subtotal
+        print(f"{product['name']} - precio: ${product['price']}, cantidad solicitada: {amount}, subtotal: ${subtotal}")
 
-    print("-" * 30)
+    print("-" * 38)
+    print(f"TOTAL: ${total}")
 
 
 if __name__ == "__main__":
@@ -98,4 +102,4 @@ if __name__ == "__main__":
 
     except ValueError as e:
         print(f"Error: {e}")
-    
+        
