@@ -61,9 +61,13 @@ def customer_data(user_name, vip=False) -> dict:
 
 def order_product(items) -> list[dict]:
     order_lines = []
+    accumulated = {}
 
     for product, amount in items:
-        amount_int, available = validate_stock(product, amount)
+        amount_int, _ = validate_stock(product, amount)
+        name = product["name"]
+        accumulated[name] = accumulated.get(name, 0) + amount_int
+        available = product["stock"] >= accumulated[name]
         _validar(available, f"No hay stock suficiente de {product['name']}.")
         order_lines.append({"product": product, "amount": amount_int})
 
