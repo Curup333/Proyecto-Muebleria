@@ -70,6 +70,17 @@ def order_product(items) -> list[dict]:
     return order_lines
 
 
+def apply_discount(vip: bool, subtotal: Decimal) -> Decimal:
+    if vip:
+        rate = Decimal("0.10")
+    elif subtotal >= 5000:
+        rate = Decimal("0.05")
+    else:
+        rate = Decimal("0.00")
+
+    return (subtotal * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
 def order_summary(user_data: dict, order_lines: list) -> None:
     print("=" * 10, "RESUMEN DE ORDEN", "=" * 10)
 
@@ -77,15 +88,20 @@ def order_summary(user_data: dict, order_lines: list) -> None:
     print(f"VIP?: {user_data['vip']}")
 
     print("ITEMS")
-    total = Decimal("0.00")
+    order_subtotal = Decimal("0.00")
     for line in order_lines:
         product = line["product"]
         amount = line["amount"]
-        subtotal = product["price"] * amount
-        total += subtotal
-        print(f"{product['name']} - precio: ${product['price']}, cantidad solicitada: {amount}, subtotal: ${subtotal}")
+        line_subtotal = product["price"] * amount
+        order_subtotal += line_subtotal
+        print(f"{product['name']} - precio: ${product['price']}, cantidad solicitada: {amount}, subtotal: ${line_subtotal}")
+
+    discount = apply_discount(user_data["vip"], order_subtotal)
+    total = order_subtotal - discount
 
     print("-" * 38)
+    print(f"SUBTOTAL: ${order_subtotal}")
+    print(f"DESCUENTO: -${discount}")
     print(f"TOTAL: ${total}")
 
 
@@ -102,4 +118,3 @@ if __name__ == "__main__":
 
     except ValueError as e:
         print(f"Error: {e}")
-        
