@@ -88,6 +88,24 @@ def apply_discount(vip: bool, subtotal: Decimal) -> Decimal:
     return (subtotal * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
+def order_totals(user_data, order_lines) -> dict:
+    order_subtotal = Decimal("0.00")
+    for line in order_lines:
+        product = line["product"]
+        amount = line["amount"]
+        line_subtotal = product["price"] * amount
+        order_subtotal += line_subtotal
+
+    discount = apply_discount(user_data["vip"], order_subtotal)
+    total = order_subtotal - discount
+
+    return {
+        "subtotal": order_subtotal,
+        "discount": discount,
+        "total": total,
+    }
+
+
 def order_summary(user_data: dict, order_lines: list) -> None:
     print("=" * 10, "RESUMEN DE ORDEN", "=" * 10)
 
@@ -95,21 +113,17 @@ def order_summary(user_data: dict, order_lines: list) -> None:
     print(f"VIP?: {user_data['vip']}")
 
     print("ITEMS")
-    order_subtotal = Decimal("0.00")
+    totals = order_totals(user_data, order_lines)
     for line in order_lines:
         product = line["product"]
         amount = line["amount"]
         line_subtotal = product["price"] * amount
-        order_subtotal += line_subtotal
         print(f"{product['name']} - precio: ${product['price']}, cantidad solicitada: {amount}, subtotal: ${line_subtotal}")
 
-    discount = apply_discount(user_data["vip"], order_subtotal)
-    total = order_subtotal - discount
-
     print("-" * 38)
-    print(f"SUBTOTAL: ${order_subtotal}")
-    print(f"DESCUENTO: -${discount}")
-    print(f"TOTAL: ${total}")
+    print(f"SUBTOTAL: ${totals['subtotal']}")
+    print(f"DESCUENTO: -${totals['discount']}")
+    print(f"TOTAL: ${totals['total']}")
 
 
 if __name__ == "__main__":

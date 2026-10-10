@@ -32,3 +32,34 @@ def test_nivel2_linea_mala_no_cambia_nada():
         order_product([(valery, 3), (teresa, 999)])
     assert valery["stock"] == 8
     assert teresa["stock"] == 30
+
+
+# Nivel 3: separar el calculo de la impresion
+
+from decimal import Decimal
+
+from creacion_orden import customer_data, order_summary
+
+
+def test_nivel3_orden_de_ejemplo_vip():
+    from creacion_orden import order_totals
+    valery = create_product("valery", 3700, 10)
+    teresa = create_product("teresa", 130, 30)
+    lines = order_product([(valery, 2), (teresa, 6)])
+    totals = order_totals(customer_data("angel", True), lines)
+    assert totals == {
+        "subtotal": Decimal("8180.00"),
+        "discount": Decimal("818.00"),
+        "total": Decimal("7362.00"),
+    }
+
+
+def test_nivel3_resumen_imprime_el_mismo_total(capsys):
+    valery = create_product("valery", 3700, 10)
+    teresa = create_product("teresa", 130, 30)
+    lines = order_product([(valery, 2), (teresa, 6)])
+    order_summary(customer_data("angel", True), lines)
+    out = capsys.readouterr().out
+    assert "TOTAL: $7362.00" in out
+    assert out.count("valery - ") == 1
+    assert "cantidad solicitada: 2, subtotal: $7400.00" in out
