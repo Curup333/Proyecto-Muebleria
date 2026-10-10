@@ -71,6 +71,9 @@ def order_product(items) -> list[dict]:
         _validar(available, f"No hay stock suficiente de {product['name']}.")
         order_lines.append({"product": product, "amount": amount_int})
 
+    for line in order_lines:
+        line["product"]["stock"] -= line["amount"]
+
     return order_lines
 
 
