@@ -88,6 +88,24 @@ def apply_discount(vip: bool, subtotal: Decimal) -> Decimal:
     return (subtotal * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
+def create_order(items) -> dict:
+    order = order_product(items)
+    state = "confirmada"
+    return {
+        "lines": order,
+        "status": state
+        }
+
+
+def cancel_order(order) -> None:
+    _validar(order["status"] == "confirmada", "La orden ya esta cancelada.")
+
+    for line in order["lines"]:
+        line["product"]["stock"] += line["amount"]
+
+    order["status"] = "cancelada"
+
+
 def order_totals(user_data, order_lines) -> dict:
     order_subtotal = Decimal("0.00")
     for line in order_lines:

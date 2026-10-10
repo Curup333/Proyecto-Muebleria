@@ -63,3 +63,26 @@ def test_nivel3_resumen_imprime_el_mismo_total(capsys):
     assert "TOTAL: $7362.00" in out
     assert out.count("valery - ") == 1
     assert "cantidad solicitada: 2, subtotal: $7400.00" in out
+
+
+# Nivel 4: cancelar una orden
+
+def test_nivel4_cancelar_devuelve_stock():
+    from creacion_orden import create_order, cancel_order
+    valery = create_product("valery", 3700, 10)
+    order = create_order([(valery, 2)])
+    assert order["status"] == "confirmada"
+    assert valery["stock"] == 8
+    cancel_order(order)
+    assert order["status"] == "cancelada"
+    assert valery["stock"] == 10
+
+
+def test_nivel4_no_se_cancela_dos_veces():
+    from creacion_orden import create_order, cancel_order
+    valery = create_product("valery", 3700, 10)
+    order = create_order([(valery, 2)])
+    cancel_order(order)
+    with pytest.raises(ValueError, match="La orden ya esta cancelada."):
+        cancel_order(order)
+    assert valery["stock"] == 10
