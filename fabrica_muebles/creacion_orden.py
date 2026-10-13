@@ -6,7 +6,11 @@ def _validar(condicion: bool, mensaje: str) -> None:
         raise ValueError(mensaje)
 
 
+id_product = 0
+
+
 def create_product(name, price, stock=0, active=True) -> dict:
+    global id_product
     _validar(isinstance(active, bool), "Active tiene que ser True o False.")
     _validar(isinstance(name, str), "El nombre tiene que ser un texto.")
     clean_name = name.strip().lower()
@@ -23,8 +27,11 @@ def create_product(name, price, stock=0, active=True) -> dict:
     _validar(price_dec > 0, "El precio tiene que ser mayor que cero.")
     _validar(stock_int >= 0, "El stock no puede ser negativo.")
 
+    id_product += 1
+
     return {
         "name": clean_name,
+        "id": id_product,
         "price": price_dec,
         "stock": stock_int,
         "active": active,
@@ -65,9 +72,9 @@ def order_product(items) -> list[dict]:
 
     for product, amount in items:
         amount_int, _ = validate_stock(product, amount)
-        name = product["name"]
-        accumulated[name] = accumulated.get(name, 0) + amount_int
-        available = product["stock"] >= accumulated[name]
+        product_id = product["id"]
+        accumulated[product_id] = accumulated.get(product_id, 0) + amount_int
+        available = product["stock"] >= accumulated[product_id]
         _validar(available, f"No hay stock suficiente de {product['name']}.")
         order_lines.append({"product": product, "amount": amount_int})
 
@@ -91,6 +98,9 @@ def apply_discount(vip: bool, subtotal: Decimal) -> Decimal:
 def create_order(items) -> dict:
     order = order_product(items)
     state = "confirmada"
+
+    _validar(len(order) > 0, "La orden no tiene productos.")
+
     return {
         "lines": order,
         "status": state

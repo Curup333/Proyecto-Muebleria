@@ -86,3 +86,21 @@ def test_nivel4_no_se_cancela_dos_veces():
     with pytest.raises(ValueError, match="La orden ya esta cancelada."):
         cancel_order(order)
     assert valery["stock"] == 10
+
+
+# Nivel 5: productos con el mismo nombre y ordenes vacias
+
+def test_nivel5_mismo_nombre_stock_separado():
+    from creacion_orden import create_order
+    silla_a = create_product("silla", 100, 5)
+    silla_b = create_product("silla", 100, 5)
+    order = create_order([(silla_a, 4), (silla_b, 4)])
+    assert order["status"] == "confirmada"
+    assert silla_a["stock"] == 1
+    assert silla_b["stock"] == 1
+
+
+def test_nivel5_orden_vacia_se_rechaza():
+    from creacion_orden import create_order
+    with pytest.raises(ValueError, match="La orden no tiene productos."):
+        create_order([])

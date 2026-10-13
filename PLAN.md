@@ -4,7 +4,7 @@
 
 **Meta:** aprender a escribir reglas de negocio de una orden que nunca dejan datos inválidos.
 
-**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 4).
+**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 5).
 
 ## Nivel 1: Producto repetido en la orden
 Hoy: stock=10, orden `[(valery, 6), (valery, 6)]` → se acepta (pide 12).
@@ -28,3 +28,14 @@ Una orden cancelada no se puede cancelar otra vez.
 Prueba final: `python3 -m pytest -k nivel4` → 2 passed
 - valery.stock 10 → `create_order([(valery, 2)])` → 8 → `cancel_order(order)` → 10, estado `"cancelada"`
 - cancelar dos veces → `ValueError("La orden ya esta cancelada.")`, valery sigue en 10
+
+## Nivel 5: Productos con el mismo nombre y órdenes vacías
+Hoy: silla A (stock 5) y silla B (stock 5), orden `[(A, 4), (B, 4)]` → se rechaza, porque los dos productos comparten la clave `"silla"`.
+Hoy: `create_order([])` → se confirma una orden sin productos.
+Construir: el stock se revisa por producto, no por nombre. Una orden sin líneas se rechaza.
+Elige un camino:
+- A: los productos no cambian. Cambias solo la clave de `accumulated`.
+- B: cada producto recibe un código único al crearlo, y ese código es la clave.
+Prueba final: `python3 -m pytest -k nivel5` → 2 passed
+- silla A (stock 5) y silla B (stock 5) → `create_order([(A, 4), (B, 4)])` se acepta → A y B quedan en 1
+- `create_order([])` → `ValueError("La orden no tiene productos.")`
