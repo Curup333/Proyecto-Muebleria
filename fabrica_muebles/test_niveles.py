@@ -104,3 +104,25 @@ def test_nivel5_orden_vacia_se_rechaza():
     from creacion_orden import create_order
     with pytest.raises(ValueError, match="La orden no tiene productos."):
         create_order([])
+
+
+# Nivel 6: numeros que no son enteros de verdad
+
+def test_nivel6_bool_no_es_numero():
+    from creacion_orden import create_order
+    with pytest.raises(ValueError, match="El stock tiene que ser un numero entero."):
+        create_product("mesa", 500, True)
+    valery = create_product("valery", 3700, 10)
+    with pytest.raises(ValueError, match="La cantidad tiene que ser un numero entero."):
+        create_order([(valery, True)])
+    assert valery["stock"] == 10
+
+
+def test_nivel6_decimal_con_decimales_se_rechaza():
+    from creacion_orden import create_order
+    with pytest.raises(ValueError, match="El stock tiene que ser un numero entero."):
+        create_product("mesa", 500, Decimal("2.5"))
+    valery = create_product("valery", 3700, 10)
+    with pytest.raises(ValueError, match="La cantidad tiene que ser un numero entero."):
+        create_order([(valery, Decimal("2.5"))])
+    assert valery["stock"] == 10

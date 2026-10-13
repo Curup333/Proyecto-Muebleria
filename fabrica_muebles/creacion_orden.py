@@ -15,7 +15,8 @@ def create_product(name, price, stock=0, active=True) -> dict:
     _validar(isinstance(name, str), "El nombre tiene que ser un texto.")
     clean_name = name.strip().lower()
     _validar(clean_name, "El nombre no puede estar vacio.")
-    _validar(not isinstance(stock, float) or stock.is_integer(), "El stock tiene que ser un numero entero.")
+    _validar(not isinstance(stock, bool), "El stock tiene que ser un numero entero.")
+    _validar(not isinstance(stock, (float, Decimal)) or stock % 1 == 0, "El stock tiene que ser un numero entero.")
 
     try:
         price_dec = Decimal(str(price)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -40,7 +41,8 @@ def create_product(name, price, stock=0, active=True) -> dict:
 
 def validate_stock(product, amount) -> tuple[int, bool]:
     _validar(product["active"], "El producto no esta activo.")
-    _validar(not isinstance(amount, float) or amount.is_integer(), "La cantidad tiene que ser un numero entero.")
+    _validar(not isinstance(amount, bool), "La cantidad tiene que ser un numero entero.")
+    _validar(not isinstance(amount, (float, Decimal)) or amount % 1 == 0, "La cantidad tiene que ser un numero entero.")
 
     try:
         amount_int = int(amount)

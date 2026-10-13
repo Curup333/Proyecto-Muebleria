@@ -4,7 +4,7 @@
 
 **Meta:** aprender a escribir reglas de negocio de una orden que nunca dejan datos inválidos.
 
-**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 5).
+**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 6).
 
 ## Nivel 1: Producto repetido en la orden
 Hoy: stock=10, orden `[(valery, 6), (valery, 6)]` → se acepta (pide 12).
@@ -39,3 +39,11 @@ Elige un camino:
 Prueba final: `python3 -m pytest -k nivel5` → 2 passed
 - silla A (stock 5) y silla B (stock 5) → `create_order([(A, 4), (B, 4)])` se acepta → A y B quedan en 1
 - `create_order([])` → `ValueError("La orden no tiene productos.")`
+
+## Nivel 6: Números que no son enteros de verdad
+Hoy: `create_product("mesa", 500, True)` → se acepta con stock 1. En Python, `True` cuenta como el número 1.
+Hoy: `create_order([(valery, Decimal("2.5"))])` → se acepta con cantidad 2. Se pierde el 0.5 sin avisar.
+Construir: el stock y la cantidad rechazan `True`, `False` y cualquier número con decimales, no solo los `float`.
+Prueba final: `python3 -m pytest -k nivel6` → 2 passed
+- stock `True` → `ValueError("El stock tiene que ser un numero entero.")`; cantidad `True` → `ValueError("La cantidad tiene que ser un numero entero.")`
+- stock `Decimal("2.5")` y cantidad `Decimal("2.5")` → los mismos dos errores. valery sigue en 10
