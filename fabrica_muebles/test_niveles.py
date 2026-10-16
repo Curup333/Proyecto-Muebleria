@@ -126,3 +126,40 @@ def test_nivel6_decimal_con_decimales_se_rechaza():
     with pytest.raises(ValueError, match="La cantidad tiene que ser un numero entero."):
         create_order([(valery, Decimal("2.5"))])
     assert valery["stock"] == 10
+
+
+# Nivel 7: cancelar un producto de la orden
+
+def test_nivel7_cancelar_un_producto():
+    from creacion_orden import create_order, cancel_line
+    valery = create_product("valery", 3700, 10)
+    teresa = create_product("teresa", 130, 30)
+    order = create_order([(valery, 2), (valery, 1), (teresa, 6)])
+    assert valery["stock"] == 7
+
+    cancel_line(order, valery["id"])
+    assert valery["stock"] == 10
+    assert teresa["stock"] == 24
+    assert len(order["lines"]) == 1
+    assert order["status"] == "confirmada"
+
+    cancel_line(order, teresa["id"])
+    assert teresa["stock"] == 30
+    assert len(order["lines"]) == 0
+    assert order["status"] == "cancelada"
+
+
+def test_nivel7_errores_no_cambian_nada():
+    from creacion_orden import create_order, cancel_order, cancel_line
+    valery = create_product("valery", 3700, 10)
+    harp = create_product("harp", 1600, 20)
+    order = create_order([(valery, 2)])
+    with pytest.raises(ValueError, match="El producto no esta en la orden."):
+        cancel_line(order, harp["id"])
+    assert valery["stock"] == 8
+    assert len(order["lines"]) == 1
+
+    cancel_order(order)
+    with pytest.raises(ValueError, match="La orden ya esta cancelada."):
+        cancel_line(order, valery["id"])
+    assert valery["stock"] == 10

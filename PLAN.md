@@ -4,7 +4,7 @@
 
 **Meta:** aprender a escribir reglas de negocio de una orden que nunca dejan datos inválidos.
 
-**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 6).
+**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 7).
 
 ## Nivel 1: Producto repetido en la orden
 Hoy: stock=10, orden `[(valery, 6), (valery, 6)]` → se acepta (pide 12).
@@ -47,3 +47,14 @@ Construir: el stock y la cantidad rechazan `True`, `False` y cualquier número c
 Prueba final: `python3 -m pytest -k nivel6` → 2 passed
 - stock `True` → `ValueError("El stock tiene que ser un numero entero.")`; cantidad `True` → `ValueError("La cantidad tiene que ser un numero entero.")`
 - stock `Decimal("2.5")` y cantidad `Decimal("2.5")` → los mismos dos errores. valery sigue en 10
+
+## Nivel 7: Cancelar un producto de la orden
+Hoy: solo puedes cancelar la orden completa.
+Construir: `cancel_line(order, product_id)` quita de la orden todas las líneas de ese producto y devuelve su stock.
+Si la orden se queda sin líneas, su estado cambia a `"cancelada"`.
+Prueba final: `python3 -m pytest -k nivel7` → 2 passed
+- valery 10, teresa 30 → `create_order([(valery, 2), (valery, 1), (teresa, 6)])` → valery 7, teresa 24
+  → `cancel_line(order, valery["id"])` → valery 10, teresa 24, queda 1 línea, estado `"confirmada"`
+  → `cancel_line(order, teresa["id"])` → teresa 30, 0 líneas, estado `"cancelada"`
+- producto que no está en la orden → `ValueError("El producto no esta en la orden.")`
+- orden cancelada → `ValueError("La orden ya esta cancelada.")`. El stock no cambia en ningún error

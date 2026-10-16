@@ -136,6 +136,27 @@ def order_totals(user_data, order_lines) -> dict:
     }
 
 
+def cancel_line(order, product_id) -> None:
+    _validar(order["status"] == "confirmada", "La orden ya esta cancelada.")
+    line_canceled = []
+    line_maintained = []
+
+    for line in order["lines"]:
+        if line["product"]["id"] == product_id:
+            line_canceled.append(line)
+        else:
+            line_maintained.append(line)
+    
+    _validar(len(line_canceled) > 0, "El producto no esta en la orden.")
+
+    for line in line_canceled:
+        line["product"]["stock"] += line["amount"]
+
+    order["lines"] = line_maintained
+    if len(line_maintained) == 0:
+        order["status"] = "cancelada"
+
+
 def order_summary(user_data: dict, order_lines: list) -> None:
     print("=" * 10, "RESUMEN DE ORDEN", "=" * 10)
 
@@ -162,10 +183,31 @@ if __name__ == "__main__":
         teresa = create_product("teresa", 130, 30)
         harp = create_product("harp", 1600, 20)
 
-        lines = order_product([(valery, 2), (teresa, 6)])
         user1 = customer_data("angel", True)
 
-        order_summary(user1, lines)
+        order1 = create_order([(valery, 2), (teresa, 6)])
+
+        order_summary(user1, order1["lines"])
+        print("-" * 38)
+        print(f"Stock: valery {valery['stock']}, teresa {teresa['stock']}")
+        print(f"Estado: {order1['status']}")
+
+        print()
+        print(">>> Cancelo valery")
+        cancel_line(order1, valery["id"])
+        order_summary(user1, order1["lines"])
+        print(f"Stock: valery {valery['stock']}, teresa {teresa['stock']}")
+        print(f"Estado: {order1['status']}")
+
+        print()
+        print(">>> Cancelo teresa")
+        cancel_line(order1, teresa["id"])
+        print(f"Stock: valery {valery['stock']}, teresa {teresa['stock']}")
+        print(f"Estado: {order1['status']}")
+
+        print()
+        print(">>> Intento cancelar teresa otra vez")
+        cancel_line(order1, teresa["id"])
 
     except ValueError as e:
         print(f"Error: {e}")
