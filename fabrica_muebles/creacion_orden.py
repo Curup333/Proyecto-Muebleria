@@ -120,16 +120,19 @@ def cancel_order(order) -> None:
 
 def order_totals(user_data, order_lines) -> dict:
     order_subtotal = Decimal("0.00")
+    save_line_subtotal = []
     for line in order_lines:
         price = line["price"]
         amount = line["amount"]
         line_subtotal = price * amount
+        save_line_subtotal.append(line_subtotal)
         order_subtotal += line_subtotal
 
     discount = apply_discount(user_data["vip"], order_subtotal)
     total = order_subtotal - discount
 
     return {
+        "line_subtotals": save_line_subtotal,
         "subtotal": order_subtotal,
         "discount": discount,
         "total": total,
@@ -165,12 +168,11 @@ def order_summary(user_data: dict, order_lines: list) -> None:
 
     print("ITEMS")
     totals = order_totals(user_data, order_lines)
-    for line in order_lines:
+    for line, total in zip(order_lines, totals["line_subtotals"]):
         product = line["product"]
         price = line["price"]
         amount = line["amount"]
-        line_subtotal = price * amount
-        print(f"{product['name']} - precio: ${price}, cantidad solicitada: {amount}, subtotal: ${line_subtotal}")
+        print(f"{product['name']} - precio: ${price}, cantidad solicitada: {amount}, subtotal: ${total}")
 
     print("-" * 38)
     print(f"SUBTOTAL: ${totals['subtotal']}")

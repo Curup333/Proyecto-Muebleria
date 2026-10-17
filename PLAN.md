@@ -4,7 +4,7 @@
 
 **Meta:** aprender a escribir reglas de negocio de una orden que nunca dejan datos inválidos.
 
-**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 8).
+**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 9).
 
 ## Nivel 1: Producto repetido en la orden
 Hoy: stock=10, orden `[(valery, 6), (valery, 6)]` → se acepta (pide 12).
@@ -66,3 +66,10 @@ Un cambio de precio antes de crear la orden sí cuenta.
 Prueba final: `python3 -m pytest -k nivel8` → 2 passed
 - orden `[(valery, 2), (teresa, 6)]`, VIP → cambio valery a `4000.00` → total sigue en `Decimal("7362.00")`; el resumen imprime `precio: $3700.00`
 - valery a `4000.00` → `create_order([(valery, 1)])` → subtotal `4000.00` → valery vuelve a `3700.00` → subtotal sigue en `4000.00`
+
+## Nivel 9: Calcular el subtotal en un solo lugar
+Hoy: `order_totals` y `order_summary` calculan los dos `price * amount` para cada línea. Si cambias la regla en un lugar, el otro imprime un número distinto.
+Construir: `order_totals` también devuelve `"line_subtotals"`, una lista con el subtotal de cada línea, en el mismo orden que las líneas. `order_summary` imprime esos números y no multiplica nada.
+Prueba final: `python3 -m pytest -k nivel9` → 2 passed
+- orden `[(valery, 2), (teresa, 6)]` → `line_subtotals` es `[Decimal("7400.00"), Decimal("780.00")]`, y su suma es el `subtotal`
+- si `order_totals` devuelve subtotales falsos `1.11` y `2.22`, el resumen imprime `subtotal: $1.11` y `subtotal: $2.22`

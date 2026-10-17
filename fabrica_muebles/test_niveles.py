@@ -47,11 +47,9 @@ def test_nivel3_orden_de_ejemplo_vip():
     teresa = create_product("teresa", 130, 30)
     lines = order_product([(valery, 2), (teresa, 6)])
     totals = order_totals(customer_data("angel", True), lines)
-    assert totals == {
-        "subtotal": Decimal("8180.00"),
-        "discount": Decimal("818.00"),
-        "total": Decimal("7362.00"),
-    }
+    assert totals["subtotal"] == Decimal("8180.00")
+    assert totals["discount"] == Decimal("818.00")
+    assert totals["total"] == Decimal("7362.00")
 
 
 def test_nivel3_resumen_imprime_el_mismo_total(capsys):
@@ -195,3 +193,37 @@ def test_nivel8_precio_antes_de_la_orden_si_cuenta():
 
     valery["price"] = Decimal("3700.00")
     assert order_totals(user, order["lines"])["subtotal"] == Decimal("4000.00")
+
+
+# Nivel 9: calcular el subtotal en un solo lugar
+
+def test_nivel9_totales_traen_subtotal_por_linea():
+    from creacion_orden import create_order, order_totals
+    valery = create_product("valery", 3700, 10)
+    teresa = create_product("teresa", 130, 30)
+    order = create_order([(valery, 2), (teresa, 6)])
+    totals = order_totals(customer_data("angel", True), order["lines"])
+    assert totals["line_subtotals"] == [Decimal("7400.00"), Decimal("780.00")]
+    assert sum(totals["line_subtotals"]) == totals["subtotal"]
+
+
+def test_nivel9_resumen_solo_imprime(capsys, monkeypatch):
+    import creacion_orden
+    from creacion_orden import create_order
+    valery = create_product("valery", 3700, 10)
+    teresa = create_product("teresa", 130, 30)
+    order = create_order([(valery, 2), (teresa, 6)])
+
+    def totales_falsos(user_data, order_lines):
+        return {
+            "line_subtotals": [Decimal("1.11"), Decimal("2.22")],
+            "subtotal": Decimal("3.33"),
+            "discount": Decimal("0.00"),
+            "total": Decimal("3.33"),
+        }
+
+    monkeypatch.setattr(creacion_orden, "order_totals", totales_falsos)
+    order_summary(customer_data("angel", True), order["lines"])
+    out = capsys.readouterr().out
+    assert "cantidad solicitada: 2, subtotal: $1.11" in out
+    assert "cantidad solicitada: 6, subtotal: $2.22" in out
