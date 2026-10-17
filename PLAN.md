@@ -4,7 +4,7 @@
 
 **Meta:** aprender a escribir reglas de negocio de una orden que nunca dejan datos inválidos.
 
-**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 7).
+**Meta final:** `python3 -m pytest` → todo en verde (niveles 1 a 8).
 
 ## Nivel 1: Producto repetido en la orden
 Hoy: stock=10, orden `[(valery, 6), (valery, 6)]` → se acepta (pide 12).
@@ -58,3 +58,11 @@ Prueba final: `python3 -m pytest -k nivel7` → 2 passed
   → `cancel_line(order, teresa["id"])` → teresa 30, 0 líneas, estado `"cancelada"`
 - producto que no está en la orden → `ValueError("El producto no esta en la orden.")`
 - orden cancelada → `ValueError("La orden ya esta cancelada.")`. El stock no cambia en ningún error
+
+## Nivel 8: Guardar el precio al comprar
+Hoy: `create_order([(valery, 2), (teresa, 6)])` → total `7362.00`. Después `valery["price"] = Decimal("4000.00")` → el total de esa misma orden cambia a `7902.00`.
+Construir: cada línea de la orden recuerda el precio del producto en el momento de la compra. `order_totals` y `order_summary` usan ese precio, no el precio actual del producto.
+Un cambio de precio antes de crear la orden sí cuenta.
+Prueba final: `python3 -m pytest -k nivel8` → 2 passed
+- orden `[(valery, 2), (teresa, 6)]`, VIP → cambio valery a `4000.00` → total sigue en `Decimal("7362.00")`; el resumen imprime `precio: $3700.00`
+- valery a `4000.00` → `create_order([(valery, 1)])` → subtotal `4000.00` → valery vuelve a `3700.00` → subtotal sigue en `4000.00`

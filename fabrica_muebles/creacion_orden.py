@@ -78,7 +78,7 @@ def order_product(items) -> list[dict]:
         accumulated[product_id] = accumulated.get(product_id, 0) + amount_int
         available = product["stock"] >= accumulated[product_id]
         _validar(available, f"No hay stock suficiente de {product['name']}.")
-        order_lines.append({"product": product, "amount": amount_int})
+        order_lines.append({"product": product, "amount": amount_int, "price": product["price"]})
 
     for line in order_lines:
         line["product"]["stock"] -= line["amount"]
@@ -121,9 +121,9 @@ def cancel_order(order) -> None:
 def order_totals(user_data, order_lines) -> dict:
     order_subtotal = Decimal("0.00")
     for line in order_lines:
-        product = line["product"]
+        price = line["price"]
         amount = line["amount"]
-        line_subtotal = product["price"] * amount
+        line_subtotal = price * amount
         order_subtotal += line_subtotal
 
     discount = apply_discount(user_data["vip"], order_subtotal)
@@ -167,9 +167,10 @@ def order_summary(user_data: dict, order_lines: list) -> None:
     totals = order_totals(user_data, order_lines)
     for line in order_lines:
         product = line["product"]
+        price = line["price"]
         amount = line["amount"]
-        line_subtotal = product["price"] * amount
-        print(f"{product['name']} - precio: ${product['price']}, cantidad solicitada: {amount}, subtotal: ${line_subtotal}")
+        line_subtotal = price * amount
+        print(f"{product['name']} - precio: ${price}, cantidad solicitada: {amount}, subtotal: ${line_subtotal}")
 
     print("-" * 38)
     print(f"SUBTOTAL: ${totals['subtotal']}")

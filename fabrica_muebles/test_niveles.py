@@ -163,3 +163,35 @@ def test_nivel7_errores_no_cambian_nada():
     with pytest.raises(ValueError, match="La orden ya esta cancelada."):
         cancel_line(order, valery["id"])
     assert valery["stock"] == 10
+
+
+# Nivel 8: guardar el precio al comprar
+
+def test_nivel8_cambio_de_precio_no_cambia_la_orden(capsys):
+    from creacion_orden import create_order, order_totals
+    valery = create_product("valery", 3700, 10)
+    teresa = create_product("teresa", 130, 30)
+    user = customer_data("angel", True)
+    order = create_order([(valery, 2), (teresa, 6)])
+
+    valery["price"] = Decimal("4000.00")
+
+    totals = order_totals(user, order["lines"])
+    assert totals["total"] == Decimal("7362.00")
+    order_summary(user, order["lines"])
+    out = capsys.readouterr().out
+    assert "valery - precio: $3700.00" in out
+    assert "TOTAL: $7362.00" in out
+
+
+def test_nivel8_precio_antes_de_la_orden_si_cuenta():
+    from creacion_orden import create_order, order_totals
+    valery = create_product("valery", 3700, 10)
+    user = customer_data("angel", False)
+
+    valery["price"] = Decimal("4000.00")
+    order = create_order([(valery, 1)])
+    assert order_totals(user, order["lines"])["subtotal"] == Decimal("4000.00")
+
+    valery["price"] = Decimal("3700.00")
+    assert order_totals(user, order["lines"])["subtotal"] == Decimal("4000.00")
